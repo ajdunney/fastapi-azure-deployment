@@ -1,0 +1,84 @@
+name: 'Terraform'
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_AD_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
+        TF_VAR_service_principal_client_id: ${{ secrets.AZURE_AD_CLIENT_ID }}
+        TF_VAR_service_principal_client_secret: ${{ secrets.AZURE_AD_CLIENT_SECRET }}
+        
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3 
+
+    - name: Terraform Init
+      run: terraform init
+      working-directory: ./terraform
+
+    - name: Terraform Format
+      run: terraform fmt -check
+      working-directory: ./terraform
+
+    - name: Terraform Plan
+      run: terraform plan -input=false
+      working-directory: ./terraform
+
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: terraform apply -auto-approve -input=false
+      working-directory: ./terraform
+
+    - name: Get Terraform Outputs
+      id: tf_output
+      run: |
+        echo "ACR_NAME=$(terraform output -raw acr_name)" >> $GITHUB_ENV
+      working-directory: ./terraform
+
+    - name: Build Docker Image
+      run: |
+        pwd
+        ls -la
+        ls . -la
+        docker build -t ${{ env.ACR_NAME }}.azurecr.io/myapi:latest .
+      working-directory: ./app
+
+    - name: Azure login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIAL }}
+
+    - name: Get ACR Credentials
+      id: get_acr_credentials
+      run: |
+        echo "::set-output name=acr_username::$(az acr credential show --name ${{ env.ACR_NAME }} --query 'username' -o tsv)"
+        echo "::set-output name=acr_password::$(az acr credential show --name ${{ env.ACR_NAME }} --query 'passwords[0].value' -o tsv)"
+
+    - name: Login to ACR
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ env.ACR_NAME }}.azurecr.io
+        username: ${{ steps.get_acr_credentials.outputs.acr_username }}
+        password: ${{ steps.get_acr_credentials.outputs.acr_password }}
+
+    - name: Tag and Push Docker Image
+      run: |
+       docker push ${{ env.ACR_NAME }}.azurecr.io/myapi:latest
