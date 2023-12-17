@@ -31,7 +31,7 @@ jobs:
       uses: actions/checkout@v3 
 
     - name: Terraform Init
-      run: terraform init -force-copy
+      run: terraform init
       working-directory: ./terraform
 
     - name: Terraform Format
