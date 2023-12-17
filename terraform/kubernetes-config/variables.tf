@@ -14,3 +14,7 @@ variable "service_principal_client_id" {
 variable "service_principal_client_secret" {
   type = string
 }
+
+variable "kubeconfig" {
+  type = string
+}
