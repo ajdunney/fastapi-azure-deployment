@@ -63,7 +63,7 @@ module "kubernetes-config" {
   service_principal_client_secret = var.service_principal_client_secret
 }
 
-# module "istio" {
-#   depends_on = [module.aks-cluster, module.kubernetes-config]
-#   source     = "./istio"
-# }
+module "istio" {
+  depends_on = [module.aks-cluster, module.kubernetes-config]
+  source     = "./istio"
+}
