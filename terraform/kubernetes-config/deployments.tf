@@ -7,14 +7,14 @@ resource "kubernetes_deployment" "fastapi-deployment-v1" {
     replicas = 1
     selector {
       match_labels = {
-        app = "fastapi-app"
+        app = "fastapi-app-v1"
         version = "v1"
       }
     }
     template {
       metadata {
         labels = {
-          app = "fastapi-app"
+          app = "fastapi-app-v1"
           version = "v1"
         }
       }
@@ -53,14 +53,14 @@ resource "kubernetes_deployment" "fastapi-deployment-v2" {
     replicas = 1
     selector {
       match_labels = {
-        app = "fastapi-app"
+        app = "fastapi-app-v2"
         version = "v2"
       }
     }
     template {
       metadata {
         labels = {
-          app = "fastapi-app"
+          app = "fastapi-app-v2"
           version = "v2"
         }
       }

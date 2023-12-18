@@ -22,7 +22,7 @@ resource "kubernetes_manifest" "my_virtual_service" {
             route = [
                 {
                 destination = {
-                    host = "fastapi-service.fastapi-app.svc.cluster.local"
+                    host = "fastapi-service-v1.fastapi-app.svc.cluster.local"
                     subset = "v1"
                     port = {
                     number = 80 
@@ -32,7 +32,7 @@ resource "kubernetes_manifest" "my_virtual_service" {
                 },
                 {
                     destination = {
-                    host = "fastapi-service.fastapi-app.svc.cluster.local"
+                    host = "fastapi-service-v2.fastapi-app.svc.cluster.local"
                     subset = "v2"
                     port = {
                         number = 80 
