@@ -1,4 +1,5 @@
 resource "kubernetes_manifest" "my_virtual_service" {
+  depends_on = [helm_release.istiod]
   manifest = {
     apiVersion = "networking.istio.io/v1alpha3"
     kind       = "VirtualService"

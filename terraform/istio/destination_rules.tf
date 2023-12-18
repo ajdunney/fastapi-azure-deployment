@@ -1,4 +1,5 @@
 resource "kubernetes_manifest" "my_destination_rule" {
+  depends_on = [helm_release.istiod]
   manifest = {
     apiVersion = "networking.istio.io/v1alpha3"
     kind       = "DestinationRule"

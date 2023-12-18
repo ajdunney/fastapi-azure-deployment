@@ -16,6 +16,7 @@ resource "helm_release" "istio_ingress_gateway" {
 }
 
 resource "kubernetes_manifest" "istio_gateway" {
+  depends_on = [helm_release.istio_ingress_gateway]
     manifest = {
         apiVersion = "networking.istio.io/v1alpha3"
         kind       = "Gateway"
